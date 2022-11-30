@@ -1,0 +1,70 @@
+version: '3'
+
+services:
+  app:
+    build:
+      args:
+        user: webdev
+        uid: 1000
+      context: ./.docker/php/apache/.
+      dockerfile: Dockerfile
+    container_name: php
+    restart: always
+    working_dir: /var/www/html
+    ports:
+      - 8080:80# - NGINX
+#   working_dir: /var/www
+    volumes:
+      - ./src:/var/www/html
+# - NGINX
+#      - ./src:/var/www
+    networks:
+      - main-nw
+
+# - NGINX -
+#  webserver:
+#    image: nginx:1.21-alpine
+#    container_name: nginx
+#    restart: always
+#    ports:
+#      - 8080:80
+#      - 443:443
+#    volumes:
+#      - ./src:/var/www
+#      - ./.docker/nginx:/etc/nginx/conf.d
+#    networks:
+#      - main-nw
+
+  db:
+    image: mariadb:10.6
+    container_name: mariadb
+    restart: always
+    ports:
+      - 3307:3306
+    environment:
+        MYSQL_ROOT_PASSWORD: rootpwd
+        MYSQL_DATABASE: app_db
+        MYSQL_PASSWORD: 123
+        MYSQL_USER: app_usr
+    volumes:
+      - ./.docker/tmp/mysql:/var/lib/mysql
+    networks:
+      - main-nw
+
+  redis:
+    image: redis:alpine
+    container_name: redis
+    restart: always
+    networks:
+      - main-nw
+  
+#  memcached:
+#    image: memcached:alpine
+#    container_name: memcached
+#    restart: always
+#    networks:
+#      - main-nw
+
+networks:
+  main-nw:
+    driver: bridge
